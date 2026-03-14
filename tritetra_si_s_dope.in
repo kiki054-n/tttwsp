@@ -1,0 +1,91 @@
+# ============================================================
+#  TriTetra Water Splitting Project — v3.1.4
+#  LAMMPS Input Script
+#
+#  Purpose : Confirm local geometric distortion (v4 disruption)
+#            caused by S dopant in Si diamond-cubic lattice
+#
+#  Lattice  : Si (diamond cubic, a = 5.431 Å)
+#  Dopant   : S (1 atom replacing Si at cell center)
+#  Method   : Energy minimization + structural analysis
+#  FF       : Stillinger-Weber (Si) + cross-terms for S
+#
+#  Output   :
+#    - tritetra_relaxed.xyz      — relaxed structure
+#    - tritetra_bonds.txt        — bond lengths around S
+#    - tritetra_thermo.log       — energy log
+#
+#  Run      : lammps -in tritetra_si_s_dope.in
+# ============================================================
+
+# ── 基本設定 ────────────────────────────────────────────────
+units           metal          # eV, Å, ps
+atom_style      atomic
+boundary        p p p          # 全方向周期境界条件
+
+# ── Si ダイヤモンド格子の構築（3×3×3 スーパーセル）─────────
+# ダイヤモンド構造: FCC + 内部に (0.25, 0.25, 0.25) のベース
+lattice         diamond 5.431
+region          box block 0 3 0 3 0 3
+create_box      2 box          # タイプ1=Si, タイプ2=S
+
+create_atoms    1 box          # 全サイトをSiで埋める
+
+# ── S ドーパントの配置（トリテトラ・トリガー）──────────────
+# セル中心に最も近い原子をSに置換
+# 3×3×3 Si diamond: 216原子, 中心付近のインデックスを指定
+# (セル中心 = 8.1465, 8.1465, 8.1465 Å 付近)
+region          dopant_site sphere 8.1465 8.1465 8.1465 1.5
+set             region dopant_site type 2   # S に変更
+
+# 置換後の原子数確認
+variable        n_si  equal "count(all,type,1)"
+variable        n_s   equal "count(all,type,2)"
+print           ">>> Si atoms : ${n_si}"
+print           ">>> S  atoms : ${n_s}"
+
+# ── ポテンシャルの設定 ───────────────────────────────────────
+# Stillinger-Weber ポテンシャル (Si–Si, Si–S, S–S)
+# ※ si_s.sw ファイルが必要（後述の Python スクリプトで生成）
+pair_style      sw
+pair_coeff      * * si_s.sw Si S
+
+# ── 近傍リストの設定 ────────────────────────────────────────
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+
+# ── エネルギー最小化（構造緩和）────────────────────────────
+# S導入による局所歪みを緩和させて平衡構造を得る
+thermo          10
+thermo_style    custom step pe ke etotal press vol
+
+fix             1 all box/relax iso 0.0 vmax 0.001
+minimize        1.0e-8 1.0e-10 10000 100000
+unfix           1
+
+print           ">>> Minimization complete"
+
+# ── 緩和後の構造を出力 ──────────────────────────────────────
+write_dump      all xyz tritetra_relaxed.xyz modify element Si S
+
+# ── 局所歪みの定量解析 ──────────────────────────────────────
+# S原子周辺の結合長を計算（トリテトラ均衡の崩れを数値化）
+compute         bonds all bond/local dist
+dump            bond_dump all local 1 tritetra_bonds.txt &
+                c_bonds
+
+run             0   # 1ステップ実行して dump を出力
+
+# ── 各原子の変位ベクトルを計算 ─────────────────────────────
+# Sドープ前後の変位 = v4の崩れを空間的に可視化
+compute         disp all displace/atom
+dump            disp_dump all custom 1 tritetra_displacement.dump &
+                id type x y z c_disp[1] c_disp[2] c_disp[3] c_disp[4]
+dump_modify     disp_dump element Si S
+
+run             0
+
+print           "============================================"
+print           " TriTetra v3.1.4 — Simulation Complete"
+print           " v1+v2+v3+v4 = 0 : local disruption mapped"
+print           "============================================"
