@@ -2,6 +2,7 @@
 
 **A novel geometric framework for low-energy H₂O dissociation via vector equilibrium disruption**
 
+[![Version](https://img.shields.io/badge/version-v3.1.4-blueviolet)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Conceptual / Open for Collaboration](https://img.shields.io/badge/Status-Conceptual%20%2F%20Open%20for%20Collaboration-blue)]()
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen)]()
@@ -27,11 +28,11 @@ This repository serves as an open science platform for:
 
 At the smallest unit of space (one "box" = one bit of spatial information), wave behavior and geometric equilibrium govern all physical interactions.
 
-Within a regular tetrahedron, the four vectors pointing toward its vertices satisfy the following equilibrium condition:
+A sphere represents the most complete geometric object: the sum of all vectors from its center to its surface is zero. The regular tetrahedron — inscribed within a sphere — is the **simplest discrete approximation** of this truth. With only four vertices, it perfectly reproduces the sphere's total vector cancellation:
 
-$$\vec{v}_1 + \vec{v}_2 + \vec{v}_3 = -\vec{v}_4$$
+$$\vec{v}_1 + \vec{v}_2 + \vec{v}_3 + \vec{v}_4 = 0$$
 
-This identity — which we term **TriTetra Vector Equilibrium** — is not merely a mathematical curiosity. It is proposed as the geometric substrate underlying all stable bonding configurations in sp³-hybridized systems (e.g., H₂O, diamond, Si, cBN).
+This identity — which we term **TriTetra Vector Equilibrium** — is not merely a mathematical curiosity. The tetrahedron is the minimum polyhedral unit capable of encoding the sphere's infinite-vector balance into a finite, physically meaningful structure. It is proposed as the geometric substrate underlying all stable bonding configurations in sp³-hybridized systems (e.g., H₂O, diamond, Si, cBN).
 
 ### Redefining Chemical Bonds as Vector States
 
@@ -316,5 +317,5 @@ Theoretical framework developed independently. Simulation infrastructure built o
 
 ---
 
-*"The geometry of space is not a passive stage — it is an active participant in every physical interaction."*
-— TriTetra Project
+*"The sphere whispers zero. The tetrahedron remembers it."*  
+— TriTetra Project, v3.1.4
