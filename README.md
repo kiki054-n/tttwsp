@@ -1,0 +1,320 @@
+# TriTetra Water Splitting Project
+
+**A novel geometric framework for low-energy H₂O dissociation via vector equilibrium disruption**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Status: Conceptual / Open for Collaboration](https://img.shields.io/badge/Status-Conceptual%20%2F%20Open%20for%20Collaboration-blue)]()
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen)]()
+
+---
+
+## 🧭 Overview
+
+This project proposes and simulates a fundamentally new approach to hydrogen energy generation through **low-energy H₂O dissociation**, grounded in an original geometric theory called **TriTetra Theory**.
+
+Rather than relying on brute-force electrochemical energy to break molecular bonds, this framework hypothesizes that **molecular bonds can be disrupted by collapsing the geometric vector equilibrium** that underlies their spatial configuration — specifically, the four-vector balance inherent to tetrahedral bonding geometries.
+
+This repository serves as an open science platform for:
+- Formulating and testing the TriTetra theoretical framework
+- Running molecular dynamics and quantum chemistry simulations
+- Inviting collaboration from physicists, materials scientists, and computational chemists worldwide
+
+---
+
+## 🔷 Core Theory: TriTetra and Vector Equilibrium
+
+### The Fundamental Postulate
+
+At the smallest unit of space (one "box" = one bit of spatial information), wave behavior and geometric equilibrium govern all physical interactions.
+
+Within a regular tetrahedron, the four vectors pointing toward its vertices satisfy the following equilibrium condition:
+
+$$\vec{v}_1 + \vec{v}_2 + \vec{v}_3 = -\vec{v}_4$$
+
+This identity — which we term **TriTetra Vector Equilibrium** — is not merely a mathematical curiosity. It is proposed as the geometric substrate underlying all stable bonding configurations in sp³-hybridized systems (e.g., H₂O, diamond, Si, cBN).
+
+### Redefining Chemical Bonds as Vector States
+
+In the TriTetra framework, the covalent bonds of H₂O are reinterpreted as a **four-vector equilibrium state** in local space. Each bond corresponds to a vector, and the stability of the molecule is a consequence of this equilibrium being maintained.
+
+**Central hypothesis:**  
+> If the local vector equilibrium is intentionally disrupted — specifically by eliminating or inverting v₄ — the molecule can be driven to dissociation at energies far below the conventional bond dissociation threshold (~500 kJ/mol for O–H bonds).
+
+This disruption is not achieved by direct mechanical force, but by introducing **geometric and electronic asymmetry** into the surrounding lattice structure through strategic doping.
+
+---
+
+## ⚙️ Simulation Model: The Hybrid Space-Filling Lattice
+
+The simulation space is built upon a **tetrahedral-octahedral hybrid lattice** — a structure in which regular tetrahedra and regular octahedra tessellate three-dimensional space without gaps. This geometry is the natural physical analog of the TriTetra equilibrium.
+
+### Lattice Components
+
+| Component | Role in Model |
+|---|---|
+| **Si / Diamond / cBN** | Base lattice substrate. All form perfect sp³ tetrahedral structures — the spatial realization of TriTetra equilibrium. |
+| **Carbon Nanotube (CNT)** | Energy waveguide. Functions as a 1D pipe within the 3D closed lattice, providing a directed channel for energy (wave) propagation. |
+| **Sulfur (S) dopant** | Geometric trigger. With 6 valence electrons, S introduces deliberate geometric and electronic asymmetry — a local v₄ disruption — into the otherwise perfect tetrahedral lattice. |
+| **H₂O molecule** | Target. Positioned within the lattice to receive the trigger effect propagated by S and amplified by the CNT waveguide. |
+
+### Mechanism Hypothesis
+
+```
+[Perfect sp³ Lattice]
+       ↓
+[S dopant introduced]
+       ↓
+[Local v₄ disruption: geometric asymmetry created]
+       ↓
+[Specific resonance frequency generated]
+       ↓ (amplified by CNT waveguide)
+[H₂O equilibrium state collapses]
+       ↓
+[Low-energy dissociation: H₂O → H₂ + ½O₂]
+```
+
+The sulfur atom's extra valence electrons (relative to Si/C/B-N) create a local imbalance that propagates as a geometric wave through the tetrahedral lattice. The CNT provides a preferential energy path, concentrating this perturbation at the target H₂O molecule.
+
+---
+
+## 🔬 Proposed Simulation Approaches
+
+### 1. Density Functional Theory (DFT)
+**Software:** [VASP](https://www.vasp.at/), [Quantum ESPRESSO](https://www.quantum-espresso.org/), [CP2K](https://www.cp2k.org/)
+
+- Calculate the electronic structure of S-doped Si/diamond/cBN supercells
+- Identify local geometric distortions (bond angles, lengths) induced by S
+- Compute charge density redistribution around the dopant site
+- Analyze the adsorption and dissociation energy of H₂O on doped surfaces
+
+**Key quantities to extract:**
+- Local electrostatic potential around S dopant
+- Projected density of states (PDOS) on S and neighboring atoms
+- H₂O adsorption energy: ΔE_ads = E(slab+H₂O) − E(slab) − E(H₂O)
+- Reaction pathway for O–H bond cleavage (NEB method)
+
+### 2. Molecular Dynamics (MD)
+**Software:** [LAMMPS](https://www.lammps.org/), [GROMACS](https://www.gromacs.org/)
+
+- Large-scale simulation of H₂O dynamics in the presence of the S-doped lattice
+- Force field: ReaxFF (reactive force field capable of modeling bond breaking)
+- Observe whether S-induced geometric perturbations propagate through the lattice
+- Track H₂O dissociation events as a function of S concentration and CNT proximity
+
+### 3. Phonon / Vibrational Analysis
+**Software:** [Phonopy](https://phonopy.github.io/phonopy/), VASP
+
+- Calculate phonon dispersion of the S-doped lattice
+- Identify resonance frequencies introduced by the dopant
+- Test whether these frequencies couple to the O–H stretch mode of H₂O (~3600 cm⁻¹)
+
+---
+
+## 💻 Quick Start: Initial Simulation Scaffold
+
+### Python Structure Builder (ASE-based)
+
+```python
+"""
+tritetra_lattice_builder.py
+
+Builds an S-doped Si (or diamond) supercell with H2O molecule
+for TriTetra vector equilibrium disruption simulations.
+
+Requirements:
+    pip install ase numpy
+"""
+
+import numpy as np
+from ase import Atoms
+from ase.build import bulk, make_supercell
+from ase.io import write
+
+# ────────────────────────────────────────────
+# 1. Build base tetrahedral lattice (diamond-Si)
+# ────────────────────────────────────────────
+si = bulk('Si', crystalstructure='diamond', a=5.431)  # Angstrom
+supercell_matrix = np.diag([3, 3, 3])                  # 3x3x3 supercell
+supercell = make_supercell(si, supercell_matrix)
+
+print(f"Supercell: {len(supercell)} Si atoms")
+print(f"Cell vectors:\n{supercell.cell}")
+
+# ────────────────────────────────────────────
+# 2. Introduce S dopant (TriTetra trigger)
+#    Replace one Si atom with S at lattice center
+# ────────────────────────────────────────────
+# Find atom closest to cell center
+center = supercell.cell.sum(axis=0) / 2
+distances = [np.linalg.norm(atom.position - center) for atom in supercell]
+dopant_index = int(np.argmin(distances))
+
+supercell[dopant_index].symbol = 'S'
+print(f"\nS dopant placed at index {dopant_index}")
+print(f"Position: {supercell[dopant_index].position} Å")
+
+# ────────────────────────────────────────────
+# 3. Place H₂O molecule above dopant site
+#    O–H bond length: 0.96 Å, H–O–H angle: 104.5°
+# ────────────────────────────────────────────
+dopant_pos = supercell[dopant_index].position.copy()
+z_offset = 2.5  # Angstrom above the dopant
+
+angle = np.radians(104.5 / 2)
+bond = 0.96  # Å
+
+o_pos  = dopant_pos + np.array([0.0,  0.0,  z_offset])
+h1_pos = o_pos     + np.array([ np.sin(angle) * bond, 0.0, np.cos(angle) * bond])
+h2_pos = o_pos     + np.array([-np.sin(angle) * bond, 0.0, np.cos(angle) * bond])
+
+water = Atoms('H2O',
+              positions=[h1_pos, h2_pos, o_pos],
+              cell=supercell.cell,
+              pbc=True)
+
+combined = supercell + water
+print(f"\nFinal system: {len(combined)} atoms")
+print(f"  Si: {combined.get_chemical_symbols().count('Si')}")
+print(f"  S:  {combined.get_chemical_symbols().count('S')}")
+print(f"  O:  {combined.get_chemical_symbols().count('O')}")
+print(f"  H:  {combined.get_chemical_symbols().count('H')}")
+
+# ────────────────────────────────────────────
+# 4. Export to multiple formats
+# ────────────────────────────────────────────
+write('tritetra_system.xyz',   combined)            # XYZ for visualization
+write('tritetra_system.cif',   combined)            # CIF for VASP/QE input
+write('tritetra_system.lammps', combined, format='lammps-data')  # LAMMPS input
+
+print("\nFiles written:")
+print("  tritetra_system.xyz   — for OVITO / VESTA visualization")
+print("  tritetra_system.cif   — for VASP / Quantum ESPRESSO")
+print("  tritetra_system.lammps — for LAMMPS MD simulation")
+```
+
+### LAMMPS Input Script (MD with ReaxFF)
+
+```lammps
+# ────────────────────────────────────────────
+# tritetra_md.in
+# TriTetra MD Simulation: S-doped Si + H2O
+# ReaxFF reactive force field
+# ────────────────────────────────────────────
+
+units           real
+atom_style      charge
+boundary        p p p
+
+# Read structure from Python builder
+read_data       tritetra_system.lammps
+
+# ReaxFF force field (supports Si, S, O, H bond breaking)
+pair_style      reaxff NULL
+pair_coeff      * * ffield.reax.SiSOH Si S O H
+
+# Charge equilibration (required for ReaxFF)
+fix             qeq all qeq/reaxff 1 0.0 10.0 1.0e-6 reaxff
+
+# ── Thermostats & ensemble ──────────────────
+velocity        all create 300.0 12345 dist gaussian
+fix             npt all npt temp 300.0 300.0 100.0 iso 1.0 1.0 1000.0
+
+# ── Output settings ────────────────────────
+thermo          100
+thermo_style    custom step temp press pe ke etotal
+
+dump            trj all atom 500 tritetra_traj.lammpstrj
+dump_modify     trj sort id
+
+# Bond order output (track O-H bond breaking)
+fix             bonds all reaxff/bonds 100 bonds.reaxff
+
+# ── Run ────────────────────────────────────
+timestep        0.25   # femtoseconds
+run             40000  # 10 ps total
+```
+
+---
+
+## 📐 Theoretical Background: Why sp³ Lattices?
+
+| Crystal | Structure | Why relevant to TriTetra |
+|---|---|---|
+| Silicon (Si) | Diamond cubic | Perfect sp³ tetrahedral network; ideal TriTetra equilibrium lattice |
+| Diamond (C) | Diamond cubic | Same as Si; highest known hardness = maximally stable equilibrium |
+| cBN | Zinc-blende | sp³ analog with B and N; introduces electronegativity asymmetry |
+
+All three substrates share the same space group (Fd3̄m or F4̄3m) and maintain the tetrahedral bond angle of 109.47° — which is the spatial signature of the $\vec{v}_1 + \vec{v}_2 + \vec{v}_3 = -\vec{v}_4$ equilibrium.
+
+The introduction of S (Group 16, 6 valence electrons) into these networks creates a site where this tetrahedral symmetry is *locally broken* — the geometric equivalent of removing $\vec{v}_4$ from the equilibrium.
+
+---
+
+## 🌐 Open Collaboration
+
+This is an open science project. We actively seek collaborators in:
+
+- **Theoretical physics** — Formalizing the TriTetra vector equilibrium framework in Hilbert space / topological field theory
+- **Computational chemistry** — Running DFT and MD simulations; validating or falsifying the dissociation mechanism
+- **Materials science** — Experimental synthesis of S-doped Si/diamond/cBN structures; CNT integration
+- **Energy engineering** — Device design for practical H₂ generation applications
+
+**To contribute:**
+1. Fork this repository
+2. Open an Issue to discuss your approach
+3. Submit a Pull Request with simulation results, theoretical derivations, or experimental data
+
+All results — positive *and* negative — are welcome. Falsification is as valuable as confirmation.
+
+---
+
+## 🗂️ Repository Structure (Planned)
+
+```
+tritetra-water-splitting/
+├── README.md
+├── theory/
+│   ├── tritetra_framework.pdf        # Full theoretical derivation
+│   └── vector_equilibrium_notes.md   # Working notes
+├── simulations/
+│   ├── dft/
+│   │   ├── VASP/                     # VASP INCAR, POSCAR, KPOINTS
+│   │   └── QE/                       # Quantum ESPRESSO input files
+│   ├── md/
+│   │   ├── tritetra_md.in            # LAMMPS input
+│   │   └── ffield.reax.SiSOH         # ReaxFF force field file
+│   └── builder/
+│       └── tritetra_lattice_builder.py
+├── results/
+│   └── (simulation outputs)
+└── LICENSE
+```
+
+---
+
+## ⚠️ Scientific Disclaimer
+
+This project presents a **novel, unverified theoretical framework**. The TriTetra hypothesis challenges conventional interpretations of chemical bond energetics and has not yet been peer-reviewed or experimentally confirmed.
+
+Conventional thermodynamics places the O–H bond dissociation energy at ~459 kJ/mol. The claim that geometric perturbation alone can reduce this threshold significantly is extraordinary and requires extraordinary evidence.
+
+**This project is designed to generate that evidence — or to rigorously demonstrate otherwise.**
+
+We welcome skeptical engagement. All simulation protocols are designed to be reproducible and falsifiable.
+
+---
+
+## 📄 License
+
+MIT License — See [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Theoretical framework developed independently. Simulation infrastructure built on open-source tools: [ASE](https://wiki.fysik.dtu.dk/ase/), [LAMMPS](https://www.lammps.org/), [VASP](https://www.vasp.at/), [Quantum ESPRESSO](https://www.quantum-espresso.org/).
+
+---
+
+*"The geometry of space is not a passive stage — it is an active participant in every physical interaction."*
+— TriTetra Project
