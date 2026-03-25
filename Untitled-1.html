@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会の幾何学 / Social Geometry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1814;
+            --paper: #f5f0e8;
+            --accent: #c8460a;
+            --accent2: #2a6496;
+            --muted: #7a7268;
+            --border: #d4cdc0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans JP', serif;
+            background: var(--paper);
+            color: var(--ink);
+            margin: 0;
+        }
+
+        /* Language Toggle */
+        #lang-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1.5rem;
+            z-index: 100;
+            display: flex;
+            gap: 0;
+            border: 1.5px solid var(--ink);
+            overflow: hidden;
+            border-radius: 2px;
+        }
+        .lang-btn {
+            padding: 0.4rem 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: var(--paper);
+            color: var(--ink);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--paper);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .site-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        nav a {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.2s;
+        }
+        nav a:hover, nav a.active { color: var(--accent); }
+
+        /* Hero */
+        .hero {
+            padding: 7rem 2rem 5rem;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .hero-kicker {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.8rem, 6vw, 5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            margin: 0 0 2rem;
+        }
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .hero p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--muted);
+            max-width: 580px;
+        }
+        .big-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18rem;
+            font-weight: 300;
+            color: var(--border);
+            position: absolute;
+            right: -1rem;
+            top: 3rem;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Audio Button */
+        .audio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 0.55rem 1.2rem;
+            border: 1.5px solid var(--ink);
+            background: transparent;
+            color: var(--ink);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 1px;
+        }
+        .audio-btn:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+        .audio-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* Sections */
+        .section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+        .section h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 600;
+            line-height: 1.2;
+            margin: 0 0 1rem;
+        }
+        .section > .lead {
+            color: var(--muted);
+            max-width: 600px;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            font-size: 0.98rem;
+        }
+
+        /* Grid */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+            .big-number { display: none; }
+            nav { display: none; }
+        }
+
+        /* Canvas / 3D containers */
+        .viz-panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+        }
+        .info-panel {
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+            transition: transform 0.15s ease;
+        }
+        .info-panel h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 0 0 0.8rem;
+        }
+        .info-panel p {
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+        .click-hint {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 1.5rem;
+            opacity: 0.7;
+        }
+
+        /* AI section cards */
+        .ai-function-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+        }
+        .ai-function-card:first-child { border-top: none; }
+        .ai-function-card h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.8rem;
+        }
+        .ai-function-card p {
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 768px) {
+            .ai-function-card { grid-template-columns: 1fr; }
+        }
+
+        .viz-mini {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+        .mono-diagram {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 2.2;
+        }
+        .tag-red { background: #fee2e2; color: #991b1b; padding: 0.2rem 0.8rem; border-radius: 2px; font-size: 0.7rem; letter-spacing: 0.05em; }
+        .tag-blue { background: #dbeafe; color: #1e40af; padding: 0.2rem 0.8rem; border-radius: 2px; font-size: 0.7rem; letter-spacing: 0.05em; }
+
+        /* Synthesis bars */
+        .synthesis-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 1.2rem;
+            height: 80px;
+        }
+        .bar {
+            width: 60px;
+            height: 80px;
+            border-radius: 2px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .synthesis-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .cta-btn {
+            margin-top: 1.2rem;
+            padding: 0.6rem 1.4rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            border-radius: 1px;
+            transition: opacity 0.2s;
+        }
+        .cta-btn:hover { opacity: 0.75; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        /* Divider rule */
+        .rule { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+        /* Triangle canvas cursor */
+        #triangleCanvas { cursor: pointer; }
+        #tetrahedronContainer { cursor: grab; }
+        #tetrahedronContainer:active { cursor: grabbing; }
+
+        /* TTT Theory Section */
+        .ttt-banner {
+            background: var(--ink);
+            color: var(--paper);
+            border-radius: 2px;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .ttt-banner::before {
+            content: '00';
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 9rem;
+            font-weight: 300;
+            opacity: 0.08;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .ttt-banner h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 0 0.8rem;
+            color: var(--paper);
+        }
+        .ttt-banner p {
+            color: rgba(245,240,232,0.7);
+            line-height: 1.8;
+            font-size: 0.95rem;
+            max-width: 600px;
+        }
+        .ttt-axiom {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            background: rgba(255,255,255,0.07);
+            border-left: 2px solid var(--accent);
+            padding: 0.8rem 1.2rem;
+            margin: 1.2rem 0 0;
+            color: var(--paper);
+            letter-spacing: 0.02em;
+            line-height: 1.9;
+        }
+        .ttt-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .ttt-cards { grid-template-columns: 1fr; }
+            .ttt-banner::before { display: none; }
+        }
+        .ttt-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 1.8rem;
+        }
+        .ttt-card-icon {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+        }
+        .ttt-card h5 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.6rem;
+        }
+        .ttt-card p {
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.75;
+            margin: 0;
+        }
+        .ttt-formula {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.72rem;
+            background: #f5f0e8;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.8rem;
+            margin-top: 0.8rem;
+            color: var(--accent2);
+            border-radius: 2px;
+        }
+        .bridge-arrow {
+            text-align: center;
+            padding: 1.5rem 0 0.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Language Toggle -->
+<div id="lang-toggle">
+    <button class="lang-btn active" id="btn-ja" onclick="setLang('ja')">JP</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- Header -->
+<header>
+    <div class="site-title" id="site-title">社会の新しい幾何学</div>
+    <nav>
+        <a href="#section-ttt" id="nav-ttt">TTT理論</a>
+        <a href="#section-2d" id="nav-2d">2Dモデル</a>
+        <a href="#section-3d" id="nav-3d">3Dモデル</a>
+        <a href="#section-ai" id="nav-ai">AIの役割</a>
+    </nav>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="big-number">3</div>
+    <p class="hero-kicker" id="hero-kicker">社会幾何学 · Social Geometry</p>
+    <h1 id="hero-title">平面から<br><em>空間へ</em></h1>
+    <p id="hero-body">社会を二次元的な点と線の繋がりとしてではなく、三次元的な空間構造として捉え直す。この視点の転換が、社会の分断といった複雑な問題を解決する鍵となります。</p>
+    <button class="audio-btn" onclick="playAudio('overview')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        <span id="audio-overview-label">全体概要を聴く</span>
+    </button>
+</div>
+
+<!-- Section TTT -->
+<section class="section" id="section-ttt">
+    <span class="step-label">Origin</span>
+    <h2 id="sttt-title">TTT理論（トリテトラ理論）との共鳴</h2>
+    <p class="lead" id="sttt-lead">このページで展開する「三角形から四面体へ」という社会幾何学の視点は、TTT（トリテトラ理論）が数学・物理・生命・社会に渡って提唱する統一原理と深く共鳴しています。TTTの核心は「ベクトルの総和はゼロ」——あらゆる安定構造はこの釣り合いから生まれます。</p>
+    <button class="audio-btn" onclick="playAudio('ttt')" style="margin-bottom:2rem">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        <span id="audio-ttt-label">音声解説を聴く</span>
+    </button>
+
+    <div class="ttt-banner">
+        <h3 id="ttt-banner-title">ベクトルの総和はゼロになる</h3>
+        <p id="ttt-banner-body">TTT理論（Tri-Tetra Theory）は、宇宙の根源を「双極のゼロ（00）」に置き、そこからすべての存在が波・点・正四面体・球面へと展開する過程を記述する統一理論です。原点は与えられるのではなく、到達されるものである——この逆転した視点が、社会幾何学の思想とも一致します。</p>
+        <div class="ttt-axiom" id="ttt-axiom">
+            主定理：あらゆる空間・時間・構造・生命・社会における<br>
+            ベクトルの総和は 0 である。<br><br>
+            00（双極のゼロ） → 波 → 点 → 正四面体 → 球面 → OOπ
+        </div>
+    </div>
+
+    <div class="ttt-cards">
+        <div class="ttt-card">
+            <div class="ttt-card-icon" id="ttt-c1-icon">幾何学的基盤</div>
+            <h5 id="ttt-c1-title">正四面体 = 最小安定立体</h5>
+            <p id="ttt-c1-body">TTT理論では、宇宙の安定構造の最小単位は正四面体であるとされます。4頂点・6辺・4面が互いに支え合い、単一の弱点を持たない——これはこのページの「四柱社会」モデルと完全に一致します。</p>
+            <div class="ttt-formula">v₁ + v₂ + v₃ + v₄ = 0<br>→ 任意の3頂点の和 = 残り1頂点の逆ベクトル</div>
+        </div>
+        <div class="ttt-card">
+            <div class="ttt-card-icon" id="ttt-c2-icon">社会・経済への応用</div>
+            <h5 id="ttt-c2-title">お金・モノ・時間の三角形</h5>
+            <p id="ttt-c2-body">TTTの経済モデルは「v₁（お金）＋ v₂（モノ）＋ v₃（時間）＝ 0」という三角形の釣り合いで表されます。現代社会でお金だけが肥大化した歪みは、三方よしの「売り手・買い手・社会」の均衡崩壊と同じ現象です。</p>
+            <div class="ttt-formula">v₁（お金）+ v₂（モノ）+ v₃（時間）= 0<br>→ 真の利益 = ベクトルの質の変換</div>
+        </div>
+        <div class="ttt-card">
+            <div class="ttt-card-icon" id="ttt-c3-icon">倫理的帰結</div>
+            <h5 id="ttt-c3-title">征服はゼロにならない</h5>
+            <p id="ttt-c3-body">TTT理論は「征服 ＝ 点を切ること ＝ 宇宙の原理に反する行為」と定義します。分裂した生命は時間をかけて回復・増幅する。これは四面体社会の「多極による相互支持」が一方的支配より強固である理由と同じ原理です。</p>
+            <div class="ttt-formula">3 対 3 → 均衡。どちらも勝てない。<br>→ これが真の安定状態</div>
+        </div>
+    </div>
+
+    <div class="bridge-arrow" id="ttt-bridge">↓ &nbsp; この原理が三方よし・四面体社会・AIによる統合へと展開する</div>
+</section>
+
+<!-- Section 2D -->
+<section class="section" id="section-2d">
+    <span class="step-label">Step 01</span>
+    <h2 id="s2d-title">二次元の安定：三角形のモデル</h2>日本の「三方よし」の考え方は、二次元的な安定構造の好例です。売り手、買い手、そして社会の三者が利益を得る「win-win-win」の関係は、安定した取引の基本単位を形成します。しかし、これは単一の関係性における平面的な安定に留まります。</p>
+    <button class="audio-btn" onclick="playAudio('triangle')" style="margin-bottom:2rem">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        <span id="audio-tri-label">音声解説を聴く</span>
+    </button>
+    <div class="two-col">
+        <div class="viz-panel">
+            <canvas id="triangleCanvas" width="300" height="300"></canvas>
+        </div>
+        <div class="info-panel" id="triangle-info">
+            <h4 id="triangle-title">頂点をクリック</h4>
+            <p id="triangle-text">キャンバス上の円（頂点）をクリックして、それぞれの役割についての説明を表示します。</p>
+            <span class="click-hint" id="tri-hint">← click a vertex</span>
+        </div>
+    </div>
+</section>
+
+<!-- Section 3D -->
+<section class="section" id="section-3d">
+    <span class="step-label">Step 02</span>
+    <h2 id="s3d-title">三次元の強度：四面体のモデル</h2>
+    <p class="lead" id="s3d-lead">社会をより複雑で強固なシステムとして捉えるには、「四柱」のような三次元モデルが必要です。四面体は最も単純で強固な立体です。4つの頂点（柱）が相互に連結し支え合うことで、単一のバランス点に依存しない、多角的で非常に安定した構造が生まれます。</p>
+    <button class="audio-btn" onclick="playAudio('tetrahedron')" style="margin-bottom:2rem">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        <span id="audio-tet-label">音声解説を聴く</span>
+    </button>
+    <div class="two-col">
+        <div class="viz-panel" style="height:440px">
+            <div id="tetrahedronContainer" style="width:100%;height:100%"></div>
+        </div>
+        <div class="info-panel" id="tetrahedron-info" style="min-height:440px">
+            <h4 id="tetrahedron-title">頂点をクリック</h4>
+            <p id="tetrahedron-text">3Dモデルをドラッグして回転させ、頂点をクリックして社会を支える「四柱」の例を見てみましょう。</p>
+            <span class="click-hint" id="tet-hint">← drag to rotate · click a vertex</span>
+        </div>
+    </div>
+</section>
+
+<!-- Section AI -->
+<section class="section" id="section-ai">
+    <span class="step-label">Step 03</span>
+    <h2 id="sai-title">AIが構築する「四面体社会」</h2>
+    <p class="lead" id="sai-lead">AIは、社会の理解を平面から立体へと移行させる強力なツールとなり得ます。単純なデータ分析を超え、複雑なシステムを構築し、可視化する役割を担います。</p>
+    <button class="audio-btn" onclick="playAudio('ai')" style="margin-bottom:2.5rem">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        <span id="audio-ai-label">音声解説を聴く</span>
+    </button>
+
+    <!-- AI Function 1 -->
+    <div class="ai-function-card">
+        <div>
+            <h4 id="ai1-title">1. 複雑な関係性のモデル化</h4>
+            <p id="ai1-body">人間は単純な因果関係で考えがちですが、AIは膨大なデータを処理し、社会内の複雑に絡み合った関係性をモデル化します。一つの政策変更が、経済、文化、政治、環境といった複数の「柱」にどう影響を及ぼすか、その波及効果（四面体的効果）を明らかにします。</p>
+        </div>
+        <div class="viz-mini">
+            <div class="mono-diagram">
+                <span class="tag-red" id="tag-human">人間的思考</span><br>
+                A → B<br>
+                ↓<br>
+                <span class="tag-blue" id="tag-ai">AIによるモデル化</span><br>
+                A ⇄ B ⇄ C ⇄ D ⇄ A
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Function 2 -->
+    <div class="ai-function-card">
+        <div class="viz-mini" style="font-size:2.5rem; gap:0.5rem;">
+            🌐
+            <p style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;text-align:center;margin:0" id="viz3d-label">社会システムの3D可視化</p>
+        </div>
+        <div>
+            <h4 id="ai2-title">2. 「全体像」の可視化</h4>
+            <p id="ai2-body">AIは社会システムの動的な三次元モデルを作成できます。これにより、異なる集団の価値観や経済状況、政治的見解がどのように相互に関連しているかを示し、協力可能な点や緊張関係にある領域を浮き彫りにします。「四面体社会」という抽象的な概念を、具体的に把握できるようになります。</p>
+        </div>
+    </div>
+
+    <!-- AI Function 3 -->
+    <div class="ai-function-card">
+        <div>
+            <h4 id="ai3-title">3. 統合と調和の促進</h4>
+            <p id="ai3-body">AIは対立する集団間の共通点を見出すファシリテーターとして機能します。例えば、二つの対立政党の価値観を分析し、双方を満足させる解決策を提案します。「私のやり方 vs あなたのやり方」という対立から、統合された「私たちのやり方」へと対話を進化させます。</p>
+            <button class="cta-btn" id="ai-synthesis-btn">AIによる統合をシミュレート</button>
+        </div>
+        <div class="viz-mini">
+            <div class="synthesis-wrap" id="ai-synthesis-container">
+                <div class="bar" id="bar1" style="background:#e57373"></div>
+                <div class="bar" id="bar2" style="background:#64b5f6"></div>
+            </div>
+            <p class="synthesis-label" id="synthesis-text">対立する2つの概念</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>© 2025 社会幾何学 · Social Geometry &nbsp;·&nbsp; <span id="footer-note">提供された概念を視覚化するために作成されました</span></p>
+</footer>
+
+<script>
+// =========================================================
+// CONTENT — Japanese & English
+// =========================================================
+const content = {
+    ja: {
+        siteTitle: '社会の新しい幾何学',
+        navLinks: ['TTT理論', '2Dモデル', '3Dモデル', 'AIの役割'],
+        heroKicker: '社会幾何学 · Social Geometry',
+        heroTitle: '平面から<br><em>空間へ</em>',
+        heroBody: '社会を二次元的な点と線の繋がりとしてではなく、三次元的な空間構造として捉え直す。この視点の転換が、社会の分断といった複雑な問題を解決する鍵となります。',
+        audioOverviewLabel: '全体概要を聴く',
+        audioTriLabel: '音声解説を聴く',
+        audioTetLabel: '音声解説を聴く',
+        audioAiLabel: '音声解説を聴く',
+        audioTttLabel: '音声解説を聴く',
+        stttTitle: 'TTT理論（トリテトラ理論）との共鳴',
+        stttLead: 'このページで展開する「三角形から四面体へ」という社会幾何学の視点は、TTT（トリテトラ理論）が数学・物理・生命・社会に渡って提唱する統一原理と深く共鳴しています。TTTの核心は「ベクトルの総和はゼロ」——あらゆる安定構造はこの釣り合いから生まれます。',
+        tttBannerTitle: 'ベクトルの総和はゼロになる',
+        tttBannerBody: 'TTT理論（Tri-Tetra Theory）は、宇宙の根源を「双極のゼロ（00）」に置き、そこからすべての存在が波・点・正四面体・球面へと展開する過程を記述する統一理論です。原点は与えられるのではなく、到達されるものである——この逆転した視点が、社会幾何学の思想とも一致します。',
+        tttAxiom: '主定理：あらゆる空間・時間・構造・生命・社会における\nベクトルの総和は 0 である。\n\n00（双極のゼロ） → 波 → 点 → 正四面体 → 球面 → OOπ',
+        tttC1Icon: '幾何学的基盤', tttC1Title: '正四面体 = 最小安定立体',
+        tttC1Body: 'TTT理論では、宇宙の安定構造の最小単位は正四面体であるとされます。4頂点・6辺・4面が互いに支え合い、単一の弱点を持たない——これはこのページの「四柱社会」モデルと完全に一致します。',
+        tttC2Icon: '社会・経済への応用', tttC2Title: 'お金・モノ・時間の三角形',
+        tttC2Body: 'TTTの経済モデルは「v₁（お金）＋ v₂（モノ）＋ v₃（時間）＝ 0」という三角形の釣り合いで表されます。現代社会でお金だけが肥大化した歪みは、三方よしの「売り手・買い手・社会」の均衡崩壊と同じ現象です。',
+        tttC3Icon: '倫理的帰結', tttC3Title: '征服はゼロにならない',
+        tttC3Body: 'TTT理論は「征服 ＝ 点を切ること ＝ 宇宙の原理に反する行為」と定義します。分裂した生命は時間をかけて回復・増幅する。これは四面体社会の「多極による相互支持」が一方的支配より強固である理由と同じ原理です。',
+        tttBridge: '↓   この原理が三方よし・四面体社会・AIによる統合へと展開する',
+        s2dTitle: '二次元の安定：三角形のモデル',
+        s2dLead: '日本の「三方よし」の考え方は、二次元的な安定構造の好例です。売り手、買い手、そして社会の三者が利益を得る「win-win-win」の関係は、安定した取引の基本単位を形成します。しかし、これは単一の関係性における平面的な安定に留まります。',
+        triangleDefault: { title: '頂点をクリック', text: 'キャンバス上の円（頂点）をクリックして、それぞれの役割についての説明を表示します。' },
+        triHint: '← 頂点をクリック',
+        vertices: [
+            { label: '売り手', color: '#e57373', text: '商品やサービスを責任を持って提供する主体。品質や価格の公正さが求められ、買い手との信頼関係を築きます。' },
+            { label: '買い手', color: '#64b5f6', text: '提供された商品やサービスを正当に評価し、対価を支払う主体。満足を得ることで、市場の持続性に貢献します。' },
+            { label: '社会',   color: '#81c784', text: '取引が行われる環境そのもの。公正なルール、インフラ、そして地域経済への貢献など、取引全体を支える基盤です。' }
+        ],
+        s3dTitle: '三次元の強度：四面体のモデル',
+        s3dLead: '社会をより複雑で強固なシステムとして捉えるには、「四柱」のような三次元モデルが必要です。四面体は最も単純で強固な立体です。4つの頂点（柱）が相互に連結し支え合うことで、単一のバランス点に依存しない、多角的で非常に安定した構造が生まれます。',
+        tetDefault: { title: '頂点をクリック', text: '3Dモデルをドラッグして回転させ、頂点をクリックして社会を支える「四柱」の例を見てみましょう。' },
+        tetHint: '← ドラッグで回転 · 頂点をクリック',
+        tetraVertices: [
+            { label: '経済', text: '富の生産と分配、市場の機能、雇用の創出など、社会の物質的な基盤を形成する柱。' },
+            { label: '文化', text: '価値観、伝統、芸術、教育など、人々の精神的な繋がりやアイデンティティを育む柱。' },
+            { label: '政治', text: '意思決定のプロセス、権力の配分、ルールの制定と執行など、社会の秩序を維持する柱。' },
+            { label: '環境', text: '自然資本、生態系サービス、持続可能性など、社会が存在するための物理的な土台となる柱。' }
+        ],
+        saiTitle: 'AIが構築する「四面体社会」',
+        saiLead: 'AIは、社会の理解を平面から立体へと移行させる強力なツールとなり得ます。単純なデータ分析を超え、複雑なシステムを構築し、可視化する役割を担います。',
+        ai1Title: '1. 複雑な関係性のモデル化',
+        ai1Body: '人間は単純な因果関係で考えがちですが、AIは膨大なデータを処理し、社会内の複雑に絡み合った関係性をモデル化します。一つの政策変更が、経済、文化、政治、環境といった複数の「柱」にどう影響を及ぼすか、その波及効果（四面体的効果）を明らかにします。',
+        tagHuman: '人間的思考',
+        tagAI: 'AIによるモデル化',
+        ai2Title: '2. 「全体像」の可視化',
+        ai2Body: 'AIは社会システムの動的な三次元モデルを作成できます。これにより、異なる集団の価値観や経済状況、政治的見解がどのように相互に関連しているかを示し、協力可能な点や緊張関係にある領域を浮き彫りにします。「四面体社会」という抽象的な概念を、具体的に把握できるようになります。',
+        viz3dLabel: '社会システムの3D可視化',
+        ai3Title: '3. 統合と調和の促進',
+        ai3Body: 'AIは対立する集団間の共通点を見出すファシリテーターとして機能します。例えば、二つの対立政党の価値観を分析し、双方を満足させる解決策を提案します。「私のやり方 vs あなたのやり方」という対立から、統合された「私たちのやり方」へと対話を進化させます。',
+        synthesisBtnOff: 'AIによる統合をシミュレート',
+        synthesisBtnOn: '元に戻す',
+        synthesisOff: '対立する2つの概念',
+        synthesisOn: '統合された新しい概念',
+        footerNote: '提供された概念を視覚化するために作成されました',
+        audioData: {
+            overview: "このページは、社会を二次元的な三角形から、三次元の四面体へと捉え直す新しい視点を探求します。「三方よし」の三角形モデルから、より強固な「四柱」の四面体モデルへの移行を解説し、AIがどのようにこの安定した社会構造の構築を助けるかを説明します。",
+            ttt: "TTT理論、すなわちトリテトラ理論は、宇宙の根源を双極のゼロに置き、ベクトルの総和は常にゼロであるという主定理を提唱します。正四面体は最小の安定立体であり、4つの頂点が相互に支え合うこの構造は、お金・モノ・時間の均衡という経済原理とも、売り手・買い手・社会の三方よしとも、完全に共鳴しています。",
+            triangle: "日本の「三方よし」の考え方は、二次元的な安定構造の好例です。売り手、買い手、そして社会の三者が利益を得る「win-win-win」の関係は、安定した取引の基本単位を形成します。しかし、これは単一の関係性における平面的な安定に留まります。",
+            tetrahedron: "社会をより複雑で強固なシステムとして捉えるには、「四柱」のような三次元モデルが必要です。四面体は最も単純で強固な立体です。4つの頂点（柱）が相互に連結し支え合うことで、単一のバランス点に依存しない、多角的で非常に安定した構造が生まれます。",
+            ai: "AIは、社会の理解を平面から立体へと移行させる強力なツールとなり得ます。単純なデータ分析を超え、複雑なシステムを構築し、可視化する役割を担います。"
+        }
+    },
+    en: {
+        siteTitle: 'New Social Geometry',
+        navLinks: ['TTT Theory', '2D Model', '3D Model', 'Role of AI'],
+        heroKicker: 'Social Geometry · 社会幾何学',
+        heroTitle: 'From Plane<br>to <em>Space</em>',
+        heroBody: 'Instead of viewing society as a flat network of dots and lines, we reimagine it as a three-dimensional structure. This shift in perspective is the key to solving complex challenges like social division.',
+        audioOverviewLabel: 'Listen to overview',
+        audioTriLabel: 'Listen to explanation',
+        audioTetLabel: 'Listen to explanation',
+        audioAiLabel: 'Listen to explanation',
+        s2dTitle: '2D Stability: The Triangle Model',
+        s2dLead: 'The Japanese concept of "Sanpo-yoshi" (三方よし) is a perfect example of a two-dimensional stable structure. The win-win-win relationship between seller, buyer, and society forms a fundamental unit of stable exchange — yet it remains a planar, single-relationship balance.',
+        triangleDefault: { title: 'Click a vertex', text: 'Click a circle (vertex) on the canvas to display an explanation of each role.' },
+        triHint: '← click a vertex',
+        vertices: [
+            { label: 'Seller', color: '#e57373', text: 'The party that responsibly provides goods or services. Fairness in quality and price builds trust with buyers and anchors the exchange.' },
+            { label: 'Buyer',  color: '#64b5f6', text: 'The party that fairly evaluates and pays for what is offered. Satisfaction drives market continuity and sustains the cycle of exchange.' },
+            { label: 'Society', color: '#81c784', text: 'The environment in which transactions occur — fair rules, infrastructure, and contribution to the local economy form the foundation of all exchange.' }
+        ],
+        s3dTitle: '3D Strength: The Tetrahedron Model',
+        s3dLead: 'To model society as a more complex and resilient system, we need a three-dimensional structure — the "four pillars." A tetrahedron is the simplest and most structurally sound solid. Four vertices (pillars) mutually connect and support one another, creating a multi-faceted, highly stable structure that does not rely on a single balance point.',
+        tetDefault: { title: 'Click a vertex', text: 'Drag the 3D model to rotate it and click a vertex to explore examples of the "four pillars" that sustain society.' },
+        tetHint: '← drag to rotate · click a vertex',
+        tetraVertices: [
+            { label: 'Economy', text: 'The pillar that forms the material foundation of society: production and distribution of wealth, market function, and job creation.' },
+            { label: 'Culture',  text: 'The pillar that nurtures spiritual connection and identity: values, traditions, arts, and education.' },
+            { label: 'Politics', text: 'The pillar that maintains social order: decision-making processes, distribution of power, and the creation and enforcement of rules.' },
+            { label: 'Environment', text: 'The physical foundation on which society exists: natural capital, ecosystem services, and long-term sustainability.' }
+        ],
+        saiTitle: 'AI Building the "Tetrahedral Society"',
+        saiLead: 'AI can be a powerful tool for moving our understanding of society from flat to spatial. Beyond simple data analysis, it plays a role in constructing and visualizing complex systems.',
+        ai1Title: '1. Modeling Complex Relationships',
+        ai1Body: 'Humans tend to think in simple cause-and-effect chains, but AI can process vast datasets to model the intricate, entangled relationships within society. It can reveal how a single policy change ripples across multiple pillars — economy, culture, politics, environment — illuminating the tetrahedral ripple effect.',
+        tagHuman: 'Human thinking',
+        tagAI: 'AI modeling',
+        ai2Title: '2. Visualizing the "Big Picture"',
+        ai2Body: 'AI can generate dynamic three-dimensional models of social systems. These models show how the values, economic conditions, and political views of different groups are interrelated — surfacing areas of potential cooperation and regions of tension. The abstract concept of a "tetrahedral society" becomes concretely graspable.',
+        viz3dLabel: '3D visualization of social systems',
+        ai3Title: '3. Facilitating Integration & Harmony',
+        ai3Body: 'AI can function as a facilitator that finds common ground between opposing groups. For example, it can analyze the values of two rival political parties and propose solutions that satisfy both. It evolves the dialogue from "my way vs. your way" into an integrated "our way."',
+        synthesisBtnOff: 'Simulate AI integration',
+        synthesisBtnOn: 'Reset',
+        synthesisOff: 'Two conflicting concepts',
+        synthesisOn: 'A new integrated concept',
+        footerNote: 'Created to visualize the concepts presented',
+        audioTttLabel: 'Listen to explanation',
+        stttTitle: 'Resonance with TTT Theory (Tri-Tetra Theory)',
+        stttLead: 'The social geometry perspective explored on this page — from triangle to tetrahedron — resonates deeply with the unified principle proposed by TTT (Tri-Tetra Theory) across mathematics, physics, life science, and society. The core of TTT is "the sum of all vectors is zero" — every stable structure arises from this balance.',
+        tttBannerTitle: 'The sum of all vectors is zero',
+        tttBannerBody: 'TTT Theory (Tri-Tetra Theory) places the origin of the universe in the "bipolar zero (00)" and describes the process by which all existence unfolds — from wave, to point, to regular tetrahedron, to sphere. The origin is not a starting point but a destination — this inverted perspective aligns with the philosophy of social geometry.',
+        tttAxiom: 'Master theorem: In all space, time, structure, life, and society,\nthe sum of all vectors is 0.\n\n00 (bipolar zero) → wave → point → tetrahedron → sphere → OOπ',
+        tttC1Icon: 'Geometric Foundation', tttC1Title: 'Tetrahedron = Minimal Stable Solid',
+        tttC1Body: 'In TTT Theory, the smallest unit of stable structure in the universe is the regular tetrahedron. Four vertices, six edges, and four faces mutually support each other with no single point of failure — this maps perfectly onto the "four-pillar society" model presented on this page.',
+        tttC2Icon: 'Social & Economic Application', tttC2Title: 'Money · Goods · Time Triangle',
+        tttC2Body: "TTT's economic model is expressed as v₁ (money) + v₂ (goods) + v₃ (time) = 0. The distortion caused by money ballooning disproportionately in modern society is the same phenomenon as the breakdown of the Sanpo-yoshi balance between seller, buyer, and society.",
+        tttC3Icon: 'Ethical Consequence', tttC3Title: 'Conquest Does Not Sum to Zero',
+        tttC3Body: 'TTT Theory defines "conquest = cutting a point = an act against the principles of the universe." Divided life recovers and amplifies over time. This is the same principle explaining why a tetrahedral society built on mutual multi-polar support is more resilient than unilateral domination.',
+        tttBridge: '↓   This principle unfolds into Sanpo-yoshi, the tetrahedral society, and AI-facilitated integration',
+        audioData: {
+            overview: "This page explores a new perspective on society — from a two-dimensional triangle to a three-dimensional tetrahedron. It explains the shift from the triangular 'Sanpo-yoshi' model to the more resilient 'four pillars' tetrahedral model, and how AI can help build this stable social structure.",
+            ttt: "TTT Theory, or Tri-Tetra Theory, proposes that the origin of the universe lies in the bipolar zero, and states as its master theorem that the sum of all vectors is always zero. The regular tetrahedron is the smallest stable solid, and this structure — where four vertices mutually support each other — resonates perfectly with the economic principle of balancing money, goods, and time, as well as with the Sanpo-yoshi balance of seller, buyer, and society.",
+            triangle: "The Japanese concept of Sanpo-yoshi is a great example of a two-dimensional stable structure. The win-win-win relationship between seller, buyer, and society forms a fundamental unit of stable exchange. However, it remains a planar stability within a single relationship.",
+            tetrahedron: "To model society as a more complex and resilient system, we need a three-dimensional model of 'four pillars.' The tetrahedron is the simplest and most structurally sound solid. Four vertices mutually connect and support each other, creating a highly stable, multi-faceted structure that does not rely on a single balance point.",
+            ai: "AI can be a powerful tool for shifting our understanding of society from flat to spatial. Beyond simple data analysis, it plays a role in constructing and visualizing complex systems."
+        }
+    }
+};
+
+// =========================================================
+// STATE
+// =========================================================
+let currentLang = 'ja';
+let isSynthesized = false;
+const audioCache = {};
+let currentVertices = content.ja.vertices;
+let currentTetraVertices = content.ja.tetraVertices;
+let spheres = [];
+
+// =========================================================
+// LANGUAGE SWITCHING
+// =========================================================
+function setLang(lang) {
+    currentLang = lang;
+    const c = content[lang];
+
+    document.getElementById('site-title').textContent = c.siteTitle;
+    document.getElementById('nav-ttt').textContent = c.navLinks[0];
+    document.getElementById('nav-2d').textContent = c.navLinks[1];
+    document.getElementById('nav-3d').textContent = c.navLinks[2];
+    document.getElementById('nav-ai').textContent = c.navLinks[3];
+
+    document.getElementById('hero-kicker').textContent = c.heroKicker;
+    document.getElementById('hero-title').innerHTML = c.heroTitle;
+    document.getElementById('hero-body').textContent = c.heroBody;
+    document.getElementById('audio-overview-label').textContent = c.audioOverviewLabel;
+    document.getElementById('audio-ttt-label').textContent = c.audioTttLabel;
+    document.getElementById('audio-tri-label').textContent = c.audioTriLabel;
+    document.getElementById('audio-tet-label').textContent = c.audioTetLabel;
+    document.getElementById('audio-ai-label').textContent = c.audioAiLabel;
+
+    // TTT section
+    document.getElementById('sttt-title').textContent = c.stttTitle;
+    document.getElementById('sttt-lead').textContent = c.stttLead;
+    document.getElementById('ttt-banner-title').textContent = c.tttBannerTitle;
+    document.getElementById('ttt-banner-body').textContent = c.tttBannerBody;
+    document.getElementById('ttt-axiom').innerHTML = c.tttAxiom.replace(/\n/g, '<br>');
+    document.getElementById('ttt-c1-icon').textContent = c.tttC1Icon;
+    document.getElementById('ttt-c1-title').textContent = c.tttC1Title;
+    document.getElementById('ttt-c1-body').textContent = c.tttC1Body;
+    document.getElementById('ttt-c2-icon').textContent = c.tttC2Icon;
+    document.getElementById('ttt-c2-title').textContent = c.tttC2Title;
+    document.getElementById('ttt-c2-body').textContent = c.tttC2Body;
+    document.getElementById('ttt-c3-icon').textContent = c.tttC3Icon;
+    document.getElementById('ttt-c3-title').textContent = c.tttC3Title;
+    document.getElementById('ttt-c3-body').textContent = c.tttC3Body;
+    document.getElementById('ttt-bridge').textContent = c.tttBridge;
+
+    document.getElementById('s2d-title').textContent = c.s2dTitle;
+    document.getElementById('s2d-lead').textContent = c.s2dLead;
+    document.getElementById('triangle-title').textContent = c.triangleDefault.title;
+    document.getElementById('triangle-text').textContent = c.triangleDefault.text;
+    document.getElementById('tri-hint').textContent = c.triHint;
+
+    document.getElementById('s3d-title').textContent = c.s3dTitle;
+    document.getElementById('s3d-lead').textContent = c.s3dLead;
+    document.getElementById('tetrahedron-title').textContent = c.tetDefault.title;
+    document.getElementById('tetrahedron-text').textContent = c.tetDefault.text;
+    document.getElementById('tet-hint').textContent = c.tetHint;
+
+    document.getElementById('sai-title').textContent = c.saiTitle;
+    document.getElementById('sai-lead').textContent = c.saiLead;
+    document.getElementById('ai1-title').textContent = c.ai1Title;
+    document.getElementById('ai1-body').textContent = c.ai1Body;
+    document.getElementById('tag-human').textContent = c.tagHuman;
+    document.getElementById('tag-ai').textContent = c.tagAI;
+    document.getElementById('ai2-title').textContent = c.ai2Title;
+    document.getElementById('ai2-body').textContent = c.ai2Body;
+    document.getElementById('viz3d-label').textContent = c.viz3dLabel;
+    document.getElementById('ai3-title').textContent = c.ai3Title;
+    document.getElementById('ai3-body').textContent = c.ai3Body;
+    document.getElementById('synthesis-text').textContent = isSynthesized ? c.synthesisOn : c.synthesisOff;
+    document.getElementById('ai-synthesis-btn').textContent = isSynthesized ? c.synthesisBtnOn : c.synthesisBtnOff;
+    document.getElementById('footer-note').textContent = c.footerNote;
+
+    document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+    document.documentElement.lang = lang === 'ja' ? 'ja' : 'en';
+
+    // Update canvas vertices
+    currentVertices = c.vertices;
+    drawTriangle();
+    // Update sphere userData
+    currentTetraVertices = c.tetraVertices;
+    if (spheres.length === 4) {
+        spheres.forEach((s, i) => { s.userData = c.tetraVertices[i]; });
+    }
+}
+
+// =========================================================
+// AUDIO
+// =========================================================
+window.playAudio = async (sectionId) => {
+    const cacheKey = currentLang + '_' + sectionId;
+    const textToSpeak = content[currentLang].audioData[sectionId];
+    if (!textToSpeak) return;
+
+    if (audioCache[cacheKey]) {
+        const audio = audioCache[cacheKey];
+        audio.currentTime = 0;
+        audio.play();
+        return;
+    }
+
+    const voiceName = currentLang === 'ja' ? 'Kore' : 'Aoede';
+    const payload = {
+        contents: [{ parts: [{ text: textToSpeak }] }],
+        generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } }
+        },
+        model: 'gemini-2.5-flash-preview-tts'
+    };
+
+    const apiKey = 'IzaSyC9n12Tiig-tUVSNzwSJRLFa3k5FxeHoRw';
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) return;
+        const result = await response.json();
+        const part = result?.candidates?.[0]?.content?.parts?.[0];
+        const audioBase64 = part?.inlineData?.data;
+        const mimeType = part?.inlineData?.mimeType;
+
+        if (audioBase64 && mimeType) {
+            const base64ToArrayBuffer = (b64) => {
+                const bin = window.atob(b64);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                return bytes.buffer;
+            };
+            const pcmToWav = (pcm16, sampleRate = 16000) => {
+                const numChannels = 1, sampleSize = 2;
+                const byteRate = numChannels * sampleRate * sampleSize;
+                const blockAlign = numChannels * sampleSize;
+                const dataLength = pcm16.length * sampleSize;
+                const buffer = new ArrayBuffer(44 + dataLength);
+                const view = new DataView(buffer);
+                let o = 0;
+                const ws = (v, s) => { for (let i = 0; i < s.length; i++) view.setUint8(v + i, s.charCodeAt(i)); };
+                ws(o, 'RIFF'); o += 4;
+                view.setUint32(o, 36 + dataLength, true); o += 4;
+                ws(o, 'WAVE'); o += 4;
+                ws(o, 'fmt '); o += 4;
+                view.setUint32(o, 16, true); o += 4;
+                view.setUint16(o, 1, true); o += 2;
+                view.setUint16(o, numChannels, true); o += 2;
+                view.setUint32(o, sampleRate, true); o += 4;
+                view.setUint32(o, byteRate, true); o += 4;
+                view.setUint16(o, blockAlign, true); o += 2;
+                view.setUint16(o, sampleSize * 8, true); o += 2;
+                ws(o, 'data'); o += 4;
+                view.setUint32(o, dataLength, true); o += 4;
+                for (let i = 0; i < pcm16.length; i++) { view.setInt16(o, pcm16[i], true); o += 2; }
+                return new Blob([view], { type: 'audio/wav' });
+            };
+            const pcmData = base64ToArrayBuffer(audioBase64);
+            const pcm16 = new Int16Array(pcmData);
+            const srMatch = mimeType.match(/rate=(\d+)/);
+            const sr = srMatch ? parseInt(srMatch[1], 10) : 16000;
+            const wavBlob = pcmToWav(pcm16, sr);
+            const audio = new Audio(URL.createObjectURL(wavBlob));
+            audioCache[cacheKey] = audio;
+            audio.play();
+        }
+    } catch (e) { console.error(e); }
+};
+
+// =========================================================
+// 2D TRIANGLE
+// =========================================================
+const canvas = document.getElementById('triangleCanvas');
+const ctx = canvas.getContext('2d');
+const vertexPositions = [
+    { x: 150, y: 45 },
+    { x: 45,  y: 255 },
+    { x: 255, y: 255 }
+];
+
+function drawTriangle() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.moveTo(vertexPositions[0].x, vertexPositions[0].y);
+    ctx.lineTo(vertexPositions[1].x, vertexPositions[1].y);
+    ctx.lineTo(vertexPositions[2].x, vertexPositions[2].y);
+    ctx.closePath();
+    ctx.strokeStyle = '#d4cdc0';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Draw centroid label
+    ctx.fillStyle = '#c8460a22';
+    ctx.beginPath();
+    ctx.arc(150, 185, 28, 0, Math.PI * 2);
+    ctx.fill();
+
+    currentVertices.forEach((v, i) => {
+        const p = vertexPositions[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = v.color;
+        ctx.fill();
+        ctx.fillStyle = '#1a1814';
+        ctx.font = 'bold 13px "Noto Sans JP", serif';
+        ctx.textAlign = 'center';
+        const textY = i === 0 ? p.y - 24 : p.y + 36;
+        ctx.fillText(v.label, p.x, textY);
+    });
+}
+
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    currentVertices.forEach((v, i) => {
+        const p = vertexPositions[i];
+        if (Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2) < 14) {
+            const panel = document.getElementById('triangle-info');
+            panel.style.transform = 'scale(0.97)';
+            setTimeout(() => {
+                document.getElementById('triangle-title').textContent = v.label;
+                document.getElementById('triangle-text').textContent = v.text;
+                panel.style.transform = 'scale(1)';
+            }, 120);
+        }
+    });
+});
+
+drawTriangle();
+
+// =========================================================
+// 3D TETRAHEDRON (Three.js)
+// =========================================================
+const container3D = document.getElementById('tetrahedronContainer');
+if (container3D) {
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
+
+    const camera = new THREE.PerspectiveCamera(70, container3D.clientWidth / container3D.clientHeight, 0.1, 1000);
+    camera.position.z = 3.8;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+    container3D.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xcccccc, 0.9));
+    const dLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    dLight.position.set(1, 1, 1);
+    scene.add(dLight);
+
+    const geo = new THREE.TetrahedronGeometry(1.6, 0);
+    const mat = new THREE.MeshPhongMaterial({ color: 0xd4cdc0, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
+    const tetra = new THREE.Mesh(geo, mat);
+    scene.add(tetra);
+
+    const edges = new THREE.EdgesGeometry(geo);
+    tetra.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x7a7268 })));
+
+    const vPositions = geo.attributes.position.array;
+    const initTetraVertices = content.ja.tetraVertices;
+    for (let i = 0; i < 4; i++) {
+        const sg = new THREE.SphereGeometry(0.1, 16, 16);
+        const sm = new THREE.MeshPhongMaterial({ color: 0xc8460a });
+        const sphere = new THREE.Mesh(sg, sm);
+        sphere.position.set(vPositions[i * 3], vPositions[i * 3 + 1], vPositions[i * 3 + 2]);
+        sphere.userData = initTetraVertices[i];
+        tetra.add(sphere);
+        spheres.push(sphere);
+    }
+
+    tetra.rotation.x = 0.5;
+
+    let isDragging = false, prevMouse = { x: 0, y: 0 };
+    container3D.addEventListener('mousedown', (e) => { isDragging = true; prevMouse = { x: e.offsetX, y: e.offsetY }; });
+    container3D.addEventListener('mouseup', () => { isDragging = false; });
+    container3D.addEventListener('mouseleave', () => { isDragging = false; });
+    container3D.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        tetra.rotation.y += (e.offsetX - prevMouse.x) * 0.005;
+        tetra.rotation.x += (e.offsetY - prevMouse.y) * 0.005;
+        prevMouse = { x: e.offsetX, y: e.offsetY };
+    });
+
+    // Touch support
+    let prevTouch = null;
+    container3D.addEventListener('touchstart', (e) => { prevTouch = e.touches[0]; });
+    container3D.addEventListener('touchmove', (e) => {
+        if (!prevTouch) return;
+        e.preventDefault();
+        tetra.rotation.y += (e.touches[0].clientX - prevTouch.clientX) * 0.005;
+        tetra.rotation.x += (e.touches[0].clientY - prevTouch.clientY) * 0.005;
+        prevTouch = e.touches[0];
+    }, { passive: false });
+    container3D.addEventListener('touchend', () => { prevTouch = null; });
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    container3D.addEventListener('click', (e) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObjects(spheres);
+        if (hits.length > 0) {
+            spheres.forEach(s => s.material.color.set(0xc8460a));
+            hits[0].object.material.color.set(0x2a6496);
+            const panel = document.getElementById('tetrahedron-info');
+            panel.style.transform = 'scale(0.97)';
+            setTimeout(() => {
+                document.getElementById('tetrahedron-title').textContent = hits[0].object.userData.label;
+                document.getElementById('tetrahedron-text').textContent = hits[0].object.userData.text;
+                panel.style.transform = 'scale(1)';
+            }, 120);
+        }
+    });
+
+    (function animate() {
+        requestAnimationFrame(animate);
+        if (!isDragging) tetra.rotation.y += 0.002;
+        renderer.render(scene, camera);
+    })();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container3D.clientWidth / container3D.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+    });
+}
+
+// =========================================================
+// AI SYNTHESIS
+// =========================================================
+document.getElementById('ai-synthesis-btn').addEventListener('click', () => {
+    const c = content[currentLang];
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+    const txt = document.getElementById('synthesis-text');
+    const btn = document.getElementById('ai-synthesis-btn');
+
+    if (!isSynthesized) {
+        bar1.style.transform = 'translateX(35px)';
+        bar1.style.background = '#7c3aed';
+        bar2.style.transform = 'translateX(-35px)';
+        bar2.style.background = '#7c3aed';
+        bar2.style.opacity = '0';
+        txt.textContent = c.synthesisOn;
+        btn.textContent = c.synthesisBtnOn;
+    } else {
+        bar1.style.transform = 'translateX(0)';
+        bar1.style.background = '#e57373';
+        bar2.style.transform = 'translateX(0)';
+        bar2.style.background = '#64b5f6';
+        bar2.style.opacity = '1';
+        txt.textContent = c.synthesisOff;
+        btn.textContent = c.synthesisBtnOff;
+    }
+    isSynthesized = !isSynthesized;
+});
+
+// =========================================================
+// ACTIVE NAV
+// =========================================================
+const allSections = document.querySelectorAll('section[id]');
+const allNavLinks = document.querySelectorAll('nav a');
+new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            allNavLinks.forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${id}`);
+            });
+        }
+    });
+}, { threshold: 0.4 }).observe && allSections.forEach(s => {
+    new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                allNavLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${entry.target.id}`));
+            }
+        });
+    }, { threshold: 0.4 }).observe(s);
+});
+</script>
+</body>
+</html>
