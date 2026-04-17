@@ -1,168 +1,84 @@
 # TriTetra 水分解プロジェクト（TTT-WSP）
 
-**幾何学的触媒制御による水分解のための新理論フレームワーク**
+**幾何学的触媒設計による水分解の新しいアプローチ**
 
-[![Status](https://img.shields.io/badge/Status-特許出願準備中-red)](.)
-[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-darkred)](.)
-[![Version](https://img.shields.io/badge/Version-v3.2.0--private-grey)](.)
-
----
-
-> ⚠️ **本リポジトリは特許出願準備中のため非公開です。**
-> 内容の無断転載・複製・使用を禁じます。
-> 詳細は [PATENT_NOTICE.md](./PATENT_NOTICE.md) を参照してください。
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Status](https://img.shields.io/badge/Status-Open%20Science-brightgreen)](.)
+[![English](https://img.shields.io/badge/English-README.md-blue)](./README.md)
 
 ---
 
 ## 概要
 
-本プロジェクトは、**TriTetra理論（TTT）** に基づく新しい水分解触媒メカニズムの研究・開発を目的とします。
-
-TTT理論の核心は、sp³混成軌道を持つ結晶格子の**幾何学的ベクトル均衡**を能動的に制御することで、H₂Oの解離に必要なエネルギー障壁を低減させるというアプローチです。
+本プロジェクトは、**TriTetra理論（TTT）** に基づく新しい水分解触媒メカニズムを提案し、DFT計算によって検証します。世界の研究者と共にこの手法を発展させることを目的として、オープンサイエンスとして公開しています。
 
 ---
 
-## 背景と課題
+## 核心的な発見
 
-水の電気分解による水素製造は再生可能エネルギーの文脈で注目を集めていますが、**過電圧（overpotential）** の問題が実用化の障壁となっています。
-
-| 従来技術の課題 | 内容 |
-|---|---|
-| 過電圧 | 理論値1.23Vに対し実際は1.8〜2.0V以上必要 |
-| 触媒コスト | 白金族（Pt, Ir, Ru）が必要 |
-| 耐久性 | 酸性・アルカリ環境での長期安定性が低い |
-
-本研究は、電気化学的アプローチとは根本的に異なる原理——**結晶格子の幾何学的構造制御**——からこの問題にアプローチします。
+| 計算 | 結果 | 意義 |
+|---|---|---|
+| Si+S+P共ドープ relax計算 | ΔΔE = **−4.46 eV** | S/P共ドープの相乗効果 |
+| H₂O吸着エネルギー | ΔE_ads = **−0.84 eV** | 自発的なH₂O吸着 |
+| O-H解離活性化エネルギー | Ea = **0.282 eV** | Pt触媒（~0.8 eV）より低い |
 
 ---
 
-## TriTetra理論（TTT）
+## TriTetra理論（TTT）とは
 
-### 基本原理：ベクトル均衡
-
-正四面体（tetrahedron）は、球の無限ベクトルの総和がゼロとなる性質を、最小頂点数で近似する唯一の多面体です。
+sp³混成軌道を持つ結晶格子（Si・ダイヤモンド・cBN・SiC）は正四面体構造を基本単位とし、以下のベクトル均衡を満たします：
 
 $$\vec{v}_1 + \vec{v}_2 + \vec{v}_3 + \vec{v}_4 = 0$$
 
-sp³混成軌道を持つ結晶（Si・ダイヤモンド・cBNなど）はすべてこの正四面体構造を基本単位とします。
+**中心仮説:**
+特定のドーパント（S・P）配置によりこの均衡が局所的に崩れると、隣接するH₂O分子のO-H結合解離エネルギーが変化する。
 
-### 中心仮説
-
-> 特定のドーパント配置により局所的なベクトル均衡が崩れると、隣接するH₂O分子のO-H結合解離エネルギーが変化する。
-
-この仮説はDFT（密度汎関数理論）計算によって検証可能であり、本プロジェクトの主要な計算ターゲットです。
-
-### メカニズムの概略
-
-```
-[sp³結晶格子の完全なベクトル均衡状態]
-            ↓
-[特定ドーパントによる局所的均衡崩壊]
-            ↓
-[幾何学的非対称性の伝播]
-            ↓
-[H₂OのO-H結合解離エネルギーの変化]
-            ↓
-[低エネルギーでの水分解の実現（検証中）]
-```
+この仮説をDFT計算（Quantum ESPRESSO）で検証した結果、**複数の材料系でTTT仮説と一致する方向の変化**を確認しました。
 
 ---
 
-## 着目する材料系
+## なぜ公開するのか
 
-| 役割 | 材料 | 理由 |
+特許取得より、**世界の研究者がこの手法を活用・発展させること**に価値があると考えます。
+
+- TTT理論の正しさを、より多くの研究者による追試で証明したい
+- 「sp³格子 + S/Pドープ」という材料探索を世界規模で加速させたい
+- オープンサイエンスとして、再現性・透明性を確保したい
+
+---
+
+## あなたに試してほしいこと
+
+本リポジトリのコードを使えば、**任意のsp³材料系でのH₂O吸着エネルギー変化**を計算できます。
+
+| 基板 | ドーパント候補 | 期待される効果 |
 |---|---|---|
-| 基板格子 | Si、ダイヤモンド、cBN | 完全なsp³四面体構造を持つ |
-| ドーパント | （出願書類に記載） | 局所的な幾何学的非対称性を導入 |
-| 導波構造 | カーボンナノチューブ（CNT） | エネルギーの方向的伝達 |
+| Si | S, P, Se, As | TTT効果の元素依存性 |
+| SiC | P, N, Al | HER活性の最適化 |
+| Diamond | B, N | 超安定触媒の可能性 |
+| cBN | C, Si | 界面効果の検証 |
+| GaN | Si, Mg | 光触媒との組み合わせ |
 
 ---
 
-## シミュレーション計画
+## 計算結果一覧
 
-### Phase 1：DFT計算（実施中）
-
-- ドーパント導入前後の電子密度分布の比較
-- H₂O吸着エネルギー（ΔE_ads）の計算
-- O-H結合解離経路のNEB解析
-
-**使用ソフトウェア:** Quantum ESPRESSO / VASP
-
-**現在の状態:** 入力ファイル生成完了、計算実行中
-
-### Phase 2：フォノン解析（計画中）
-
-- ドーパント周辺の局所振動モードの特定
-- H₂OのO-Hストレッチモード（~3600 cm⁻¹）との結合の検証
-
-**使用ソフトウェア:** Phonopy
-
-### Phase 3：分子動力学MD（計画中）
-
-- ReaxFF力場によるH₂O解離イベントの統計的観測
-- ドーパント濃度依存性の評価
-
-**使用ソフトウェア:** LAMMPS
+| Phase | 内容 | 主要結果 |
+|---|---|---|
+| Phase 1-2 | Si+S SCF計算 | ΔΔE = −0.09 eV |
+| Phase 3 | Si+S relax計算 | **ΔΔE = −1.67 eV** |
+| Phase 5 | SiC+S/P SCF | ΔΔE = −0.10〜−0.14 eV |
+| Phase 6 | SiC+S/P relax | SiC+P: ΔΔE = −0.31 eV |
+| Phase 7 | Si+S+P共ドープ | **ΔΔE = −4.46 eV** |
+| Phase 8 | HER NEB計算 | **Ea = 0.282 eV** |
+| Phase 9 | OER NEB計算 | Step1確認 |
 
 ---
 
-## ディレクトリ構成
-
-```
-tttwsp/
-├── README.md                  # 英語版README
-├── README_ja.md               # 本ファイル（日本語版）
-├── PATENT_NOTICE.md           # 特許権利表示
-├── SETUP.md                   # 環境構築ガイド
-├── simulations/
-│   └── dft/
-│       ├── build_structure.py # 構造生成スクリプト（ASEベース）
-│       ├── make_qe_input.py   # QE入力ファイル生成スクリプト
-│       ├── tritetra_system.xyz # 生成された構造ファイル（可視化用）
-│       ├── tritetra_system.cif # 生成された構造ファイル（QE用）
-│       ├── tritetra.in        # Quantum ESPRESSO入力ファイル
-│       ├── pseudo/            # 擬ポテンシャルファイル
-│       └── out/               # 計算結果出力先
-├── analysis/
-│   └── tritetra_analyze.py    # 結果解析スクリプト
-└── LICENSE
-```
-
----
-
-## 特許出願の状況
-
-| 項目 | 内容 |
-|---|---|
-| 出願状況 | 出願準備中（Pre-filing） |
-| 対象国・地域 | 日本 / PCT（国際出願） |
-| 出願期限 | 2026年9月14日（新規性喪失の例外 期限） |
-| 技術分類（予定） | C25B 1/04, C01B 3/04, B01J 27/00 |
-
----
-
-## 公開ロードマップ
-
-```
-[現在] Privateリポジトリ（出願準備中）
-    ↓
-[出願後] 理論概要・シミュレーション設計をPublic公開
-    ↓
-[審査中] 計算結果・解析スクリプトを段階的に公開
-    ↓
-[権利確定後] フル公開・オープンサイエンスへ移行
-```
-
----
-
-## 環境構築
-
-詳細は [SETUP.md](./SETUP.md) を参照してください。
-
-**クイックスタート（WSL2 / Linux）:**
+## クイックスタート
 
 ```bash
-# 仮想環境のセットアップ
+# 環境セットアップ（詳細はSETUP.md）
 mkdir -p ~/tttwsp/dft && cd ~/tttwsp/dft
 python3 -m venv venv && source venv/bin/activate
 pip install numpy matplotlib pandas ase
@@ -171,26 +87,38 @@ pip install numpy matplotlib pandas ase
 python3 build_structure.py
 
 # DFT計算
-mkdir -p out && pw.x < tritetra.in > tritetra.out
+mkdir -p out && pw.x < tritetra_scf.in > tritetra_scf.out
 ```
 
 ---
 
-## 共同研究・連絡
+## コラボレーション
 
-本研究への参加・共同研究に関心をお持ちの方は、Issueまたは直接連絡ください。
+以下の専門家の参加を歓迎します：
 
-**現時点でのNDA（秘密保持契約）の締結を条件に、詳細を共有できます。**
+- **計算化学者** — 他の材料系でのDFT計算
+- **実験化学者** — Si+S+P触媒の実際の合成・評価
+- **理論物理学者** — TTT理論の数理的形式化
+- **電気化学者** — 水分解活性の電気化学的測定
+
+Issueからお気軽にご連絡ください。
+
+---
+
+## 引用
+
+```
+kiki054-n. (2026). TriTetra Water Splitting Project (TTT-WSP).
+GitHub. https://github.com/kiki054-n/tttwsp
+```
 
 ---
 
 ## ライセンス
 
-Copyright © 2026 kiki054-n. All Rights Reserved.
-
-特許出願完了まで、本リポジトリのすべての内容について、いかなる形式での複製・使用・改変・配布も禁止します。
+MIT License — 自由に使用・改変・再配布できます。
 
 ---
 
-*"The sphere whispers zero. The tetrahedron remembers it."*
-— TriTetra Project, v3.2.0-private
+*"The sphere whispers zero. The tetrahedron remembers it."*  
+— TriTetra Project, v4.0.0-public
