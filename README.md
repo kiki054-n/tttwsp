@@ -3,7 +3,10 @@
 **A novel geometric framework for catalytic H₂O dissociation**  
 **幾何学的触媒設計による水分解の新しいアプローチ**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19704117.svg)](https://doi.org/10.5281/zenodo.19704117)
+[![Author](https://img.shields.io/badge/Author-川上真潔-f39c12?style=for-the-badge)](https://orcid.org/0009-0009-2972-6511)
+
 [![Status](https://img.shields.io/badge/Status-Open%20Science-brightgreen)](.)
 [![Version](https://img.shields.io/badge/Version-v4.0.0--public-blue)](.)
 [![Lang](https://img.shields.io/badge/日本語-README__ja.md-blue)](./README_ja.md)
