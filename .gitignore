@@ -1,0 +1,10 @@
+# Quantum ESPRESSO scratch — 絶対に commit しない（巨大）
+out/
+*.save/
+*.wfc*
+*.igk*
+*.mix*
+*.hub*
+CRASH
+# 擬ポテンシャルは重いので commit せず README に入手先（pslibrary）を記す
+*.UPF
