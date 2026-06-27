@@ -181,8 +181,10 @@ GitHub. https://github.com/kiki054-n/tttwsp
 
 ## 📜 ライセンス / License
 
-MIT License — 自由に使用・改変・再配布できます。
-詳細は [LICENSE](./LICENSE) を参照してください。
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+© 2026 Naoyuki Kawakami / Team Shiojiri
+
 
 ---
 
