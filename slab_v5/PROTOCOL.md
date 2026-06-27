@@ -57,6 +57,22 @@ pseudo/                擬ポテンシャル（pslibrary 1.0.0 PAW-PBE 等）を
 S は浅い擬ポテンシャルだと 30 Ry では不足しがちなので、ecut は特に丁寧に。
 決めた `ecutwfc/ecutrho/kpts/VACUUM/NLAYERS` を以降すべての系で**共通**に使う。
 
+このステップは2本のスクリプトで自動化してある:
+
+```bash
+python3 gen_convergence.py       # conv/{ecut,kpts,vacuum,layers}/*.in を生成
+# 各 .in を pw.x で実行（例）
+for d in conv/ecut conv/kpts conv/vacuum conv/layers; do
+  (cd $d && for f in *.in; do pw.x -in $f > ${f%.in}.out; done)
+done
+python3 analyze_convergence.py   # 収束した最小設定を表で提示
+```
+
+判定基準は ecut・kpts が dE/atom < 5 meV、vacuum が dE < 3 meV、layers が
+増分（傾き）の二次差 < 10 meV。**最終確認**として、選んだ設定で layers=8 と 10 の
+ΔE_ads を1点ずつ比べ、< ~50 meV で安定していれば確定（バルク寄与が相殺する
+ΔE_ads の安定性が、層厚・真空の本当の収束指標）。
+
 ---
 
 ## 4. ステップ2 — 構造構築
